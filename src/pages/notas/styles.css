@@ -1,0 +1,25 @@
+
+
+
+.content-nota{
+    display: flex;
+    grid-gap: 50px;
+    width: 95vw;
+    margin-left: 50px;
+}
+
+
+.content-criar-nota{
+   width: 500px;
+}
+
+.content-bloco-nota{
+   
+}
+
+
+.content-criar-nota form{
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
+}
