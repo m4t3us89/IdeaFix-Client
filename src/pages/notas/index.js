@@ -1,27 +1,65 @@
 
-import { Input, Textarea, Divider, Grid, Box, Flex, FormControl, FormErrorMessage, Button, Text   } from "@chakra-ui/react"
+import { Input, Textarea, Divider, Grid, Box, Flex, FormControl, FormErrorMessage, Button, Text , useToast  } from "@chakra-ui/react"
 import { Formik, Form, Field } from 'formik';
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FaWindowClose } from 'react-icons/fa';
+import notaService from "../../services/notaService";
 
 function Nota() {
-  
-  useEffect(()=>{
-    console.log('Entrou')
-  })
+  const toast = useToast()
+  const [notas, setNota] = useState([])
 
-  function onSubmit(values,actions){
-    setTimeout(() => {
-      alert(JSON.stringify(values, null, 2))
+  useEffect(()=>{
+    (async ()=>{
+      await listNota()
+    })()
+  },[])
+
+  async function  listNota(){
+    try{
+      const {data:{data:notas}} = await notaService.list()
+      setNota(notas)
+    }catch(err){}
+  }
+
+  async function removeNota(_id){
+    try{
+      await notaService.remove(_id)
+      showToast('Nota removida com sucesso.', 'Nota removida com sucesso.' , 'warning')
+      await listNota()
+    }catch(err){}
+  }
+
+  async function onSubmit(values,actions){
+    try{
+      await notaService.create(values)
+      actions.resetForm()
       actions.setSubmitting(false)
-    }, 1000)
+      showToast('Nota criada com sucesso.', 'Nota criada com sucesso.' , 'success')
+      await listNota()
+    }catch(err){
+      console.log('err', err)
+      showToast('Erro criar nota.' , 'Erro criar nota.' , 'error')
+    }
+  }
+
+  function showToast(title,description,status){
+    toast({
+      title,
+      description,
+      status,
+      position: 'top-left',
+      duration: 9000,
+      isClosable: true,
+    })
   }
 
   return (
     <Flex direction={['column','column' ,'row']} h="100vh" p={[0,10]} gridGap={[0,0,5]}>
+
       <Box p={4} w={['100%', '100%' ,'40vw']}>
-          <Box  textStyle="h2">Bloco de Notas</Box>
-          <Formik
+            <Box  textStyle="h2">Bloco de Notas</Box>
+            <Formik
               initialValues={{ assunto: "" , texto: ""}}
               onSubmit={onSubmit}
             >
@@ -62,34 +100,21 @@ function Nota() {
       <Box  p={4} w='100%' height='100%'>
         <Box textStyle="h3">Suas Notas</Box >
         <Grid templateColumns={["repeat(1, 1fr)","repeat(2, 1fr)","repeat(3, 1fr)"]} gap={10}>
-          <Box w="100%" h="150" bg="gray.100">
-            <Box display="flex" marginTop="-5px" marginRight="-5px" flexDirection="row" justifyContent="flex-end"><FaWindowClose/></Box>
-            <Box p={5}>
-              <Text fontWeight="bold" color="green.400">Ideafix</Text>
-              <Divider broder={1} mt={2} variant="dashed" bg="gray.600"></Divider>
-              <Text mt={2} color="gray.600">Empresa de pesquisa de intelgencia</Text>
+        {notas && notas.map(nota=>{
+          return (<Box key={nota._id} w="100%" h="150" bg="gray.100">
+            <Box onClick={()=>removeNota(nota._id)} cursor="pointer" display="flex" marginTop="-5px" marginRight="-5px" flexDirection="row" justifyContent="flex-end">
+              <FaWindowClose />
             </Box>
-          </Box>
-          <Box w="100%" h="150" bg="gray.100" >
-            <Box display="flex" marginTop="-5px" marginRight="-5px" flexDirection="row" justifyContent="flex-end"><FaWindowClose/></Box>
-          </Box>
-          <Box w="100%" h="150" bg="gray.100" >
-            <Box display="flex" marginTop="-5px" marginRight="-5px" flexDirection="row" justifyContent="flex-end"><FaWindowClose/></Box>
-          </Box>
-          <Box w="100%" h="150" bg="gray.100" >
-            <Box display="flex" marginTop="-5px" marginRight="-5px" flexDirection="row" justifyContent="flex-end"><FaWindowClose/></Box>
-          </Box>
-          <Box w="100%" h="150" bg="gray.100" >
-            <Box display="flex" marginTop="-5px" marginRight="-5px" flexDirection="row" justifyContent="flex-end"><FaWindowClose/></Box>
-          </Box>
-          <Box w="100%" h="150" bg="gray.100" >
-            <Box display="flex" marginTop="-5px" marginRight="-5px" flexDirection="row" justifyContent="flex-end"><FaWindowClose/></Box>
-          </Box>
-          <Box w="100%" h="150" bg="gray.100" >
-            <Box display="flex" marginTop="-5px" marginRight="-5px" flexDirection="row" justifyContent="flex-end"><FaWindowClose/></Box>
-          </Box>
+            <Box p={5}>
+              <Text fontWeight="bold" color="lightseagreen">{nota.assunto}</Text>
+              <Divider broder={1} mt={2} variant="dashed" bg="gray.400"></Divider>
+              <Text mt={2} color="gray.400">{nota.texto}</Text>
+            </Box>
+            </Box>)
+          })}
         </Grid>
       </Box>
+      
     </Flex>
   );
 }
