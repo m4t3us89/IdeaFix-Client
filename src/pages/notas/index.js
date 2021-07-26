@@ -19,7 +19,9 @@ function Nota() {
     try{
       const {data:{data:notas}} = await notaService.list()
       setNota(notas)
-    }catch(err){}
+    }catch(err){
+      showToast('Erro listar nota.' , 'Erro listar nota.' , 'error')
+    }
   }
 
   async function removeNota(_id){
@@ -27,7 +29,9 @@ function Nota() {
       await notaService.remove(_id)
       showToast('Nota removida com sucesso.', 'Nota removida com sucesso.' , 'warning')
       await listNota()
-    }catch(err){}
+    }catch(err){
+      showToast('Erro remover nota.' , 'Erro remover nota.' , 'error')
+    }
   }
 
   async function onSubmit(values,actions){
@@ -38,7 +42,6 @@ function Nota() {
       showToast('Nota criada com sucesso.', 'Nota criada com sucesso.' , 'success')
       await listNota()
     }catch(err){
-      console.log('err', err)
       showToast('Erro criar nota.' , 'Erro criar nota.' , 'error')
     }
   }
