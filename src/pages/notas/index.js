@@ -1,5 +1,5 @@
 
-import { Input, Textarea, Divider, Grid, Box, Flex, FormControl, FormErrorMessage, Button, Text , useToast  } from "@chakra-ui/react"
+import { Input, Textarea, Divider, Grid, Box, Flex, FormControl, FormErrorMessage, Button, Text , useToast, Spinner  } from "@chakra-ui/react"
 import { Formik, Form, Field } from 'formik';
 import { useEffect, useState } from "react";
 import { FaWindowClose } from 'react-icons/fa';
@@ -8,6 +8,7 @@ import notaService from "../../services/notaService";
 function Nota() {
   const toast = useToast()
   const [notas, setNota] = useState([])
+  const [isLoading, setLoading] = useState(true)
 
   useEffect(()=>{
     (async ()=>{
@@ -17,8 +18,10 @@ function Nota() {
 
   async function  listNota(){
     try{
+      setLoading(true)
       const {data:{data:notas}} = await notaService.list()
       setNota(notas)
+      setLoading(false)
     }catch(err){
       showToast('Erro listar nota.' , 'Erro listar nota.' , 'error')
     }
@@ -103,7 +106,17 @@ function Nota() {
       <Box  p={4} w='100%' height='100%'>
         <Box textStyle="h3">Suas Notas</Box >
         <Grid templateColumns={["repeat(1, 1fr)","repeat(2, 1fr)","repeat(3, 1fr)"]} gap={10}>
-        {notas && notas.map(nota=>{
+        {isLoading ? 
+          (
+          <Spinner
+            thickness="4px"
+            speed="0.65s"
+            emptyColor="gray.200"
+            color="blue.500"
+            size="xl"
+          />
+          )
+          : notas && notas.map(nota=>{
           return (<Box key={nota._id} w="100%" h="150" bg="gray.100">
             <Box onClick={()=>removeNota(nota._id)} cursor="pointer" display="flex" marginTop="-5px" marginRight="-5px" flexDirection="row" justifyContent="flex-end">
               <FaWindowClose />
